@@ -10,7 +10,7 @@
         <meta name="keywords" content="Colorlib Templates">
 
         <!-- Title Page-->
-        <title>ВЛ ЧЯТИК</title>
+        <title>VL CHAT</title>
 
         <!-- Icons font CSS-->
         <link href="css/material-design-iconic-font.min.css" rel="stylesheet" media="all">

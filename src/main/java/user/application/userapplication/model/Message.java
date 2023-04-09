@@ -5,10 +5,19 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -17,8 +26,11 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    @NotBlank(message = "Message must not be blank!")
     private String text;
+    @ElementCollection
+    @CollectionTable(name = "message_files", joinColumns = @JoinColumn(name = "message_id"))
+    @Column(name = "file_name")
+    private List<String> files;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
@@ -48,4 +60,13 @@ public class Message {
     public String getAuthorAvatar(){
         return user.getAvatarImage();
     }
+
+    public void addFile(String fileName) {
+        files.add(fileName);
+    }
+
+//    public String getFormattedFileName() {
+//        assert file != null;
+//        return file.substring(37);
+//    }
 }

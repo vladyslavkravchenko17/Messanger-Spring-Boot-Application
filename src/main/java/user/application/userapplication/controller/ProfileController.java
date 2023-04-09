@@ -3,7 +3,6 @@ package user.application.userapplication.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,18 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 import user.application.userapplication.model.User;
 import user.application.userapplication.service.UserService;
 
-import java.io.File;
-import java.io.IOException;
 import java.security.Principal;
-import java.util.Objects;
-import java.util.UUID;
 
 @Controller
 @Api("Profiles controller")
 public class ProfileController {
-
-    @Value("${upload.path}")
-    private String uploadPath;
 
     @Autowired
     private UserService userService;
@@ -43,26 +35,18 @@ public class ProfileController {
     public String changeProfile(Principal principal,
                                 @RequestParam("file") MultipartFile file,
                                 @RequestParam String username,
-                                @RequestParam String description) throws IOException {
+                                @RequestParam String description) {
         User currentUser = userService.getUserByUsername(principal.getName());
 
-        if (file != null && !Objects.requireNonNull(file.getOriginalFilename()).isEmpty()) {
-            File uploadDir = new File(uploadPath);
-            if (!uploadDir.exists()){
-                uploadDir.mkdir();
-            }
-            String uuidFile = UUID.randomUUID().toString();
-            String resultFileName = uuidFile + "." + file.getOriginalFilename();
-            file.transferTo(new File(uploadPath + "/" + resultFileName));
-            currentUser.setAvatarImage(resultFileName);
-        }
+        userService.setAvatarImage(file, currentUser);
 
-        if (!description.isEmpty()){
+
+        if (!description.isEmpty()) {
             currentUser.setDescription(description);
         }
 
         User userFromDb = userService.getUserByUsername(username);
-        if (!username.isEmpty() && userFromDb == null){
+        if (!username.isEmpty() && userFromDb == null) {
             currentUser.setUsername(username);
             userService.saveUser(currentUser);
             return "redirect:/login?logout";

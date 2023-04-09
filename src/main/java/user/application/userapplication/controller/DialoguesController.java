@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import user.application.userapplication.model.Dialogue;
 import user.application.userapplication.model.Message;
 import user.application.userapplication.model.User;
@@ -20,7 +21,6 @@ import user.application.userapplication.service.UserService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +65,11 @@ public class DialoguesController {
             return "redirect:/dialogues";
         }
 
+        if (user2.equals(user)) {
+            model.addAttribute("error", "You cannot create dialogue with yourself!");
+            return "redirect:/dialogues";
+        }
+
         Dialogue dialogue = dialogueService.findBy2Users(user, user2);
         if (dialogue != null) {
             return "redirect:/dialogues-" + dialogue.getId();
@@ -105,10 +110,12 @@ public class DialoguesController {
     @PostMapping("/dialogue-{dialogueId}")
     @ApiOperation("Send message to the dialogue with another user")
     public String addMessage(@AuthenticationPrincipal User user,
+                             @RequestParam("messageFile") MultipartFile[] messageFiles,
                              @PathVariable long dialogueId,
                              @Valid Message message,
                              BindingResult bindingResult,
                              Model model) {
+
         if (bindingResult.hasErrors()) {
             Map<String, String> errorsMap = ControllerUtils.getErrors(bindingResult);
             model.mergeAttributes(errorsMap);
@@ -116,7 +123,8 @@ public class DialoguesController {
             return "redirect:/dialogue-" + dialogueId;
         }
 
-        messageService.createNewMessage(message, user, dialogueService.getDialogueById(dialogueId));
+        messageService.createNewMessage(message, user, dialogueService.getDialogueById(dialogueId), messageFiles);
+
         return "redirect:/dialogue-" + dialogueId;
     }
 }

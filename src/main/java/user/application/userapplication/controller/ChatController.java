@@ -10,6 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import user.application.userapplication.model.Dialogue;
 import user.application.userapplication.model.Message;
 import user.application.userapplication.model.User;
@@ -46,9 +47,11 @@ public class ChatController {
     @PostMapping("/chat")
     @ApiOperation("Send message to global chat")
     public String addMessage(@AuthenticationPrincipal User user,
+                             @RequestParam("messageFile") MultipartFile[] messageFiles,
                              @Valid Message message,
                              BindingResult bindingResult,
                              Model model) {
+
         if (bindingResult.hasErrors()) {
             Map<String, String> errorsMap = ControllerUtils.getErrors(bindingResult);
             model.mergeAttributes(errorsMap);
@@ -56,7 +59,8 @@ public class ChatController {
             return "redirect:/chat";
         }
 
-        messageService.createNewMessage(message, user, dialogueService.getDialogueById(1));
+        messageService.createNewMessage(message, user, dialogueService.getDialogueById(1), messageFiles);
+
         return "redirect:/chat";
     }
 

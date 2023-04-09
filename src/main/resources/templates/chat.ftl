@@ -13,11 +13,14 @@
     <div class="panel-body" style="background-color: #1a1a1a">
         <div>
             <div>
-                <form id="message-form" method="post" action="/chat">
+                <form id="message-form" method="post" action="/chat" enctype="multipart/form-data">
                     <#if textError??>
                         <div style="color: red;">*${textError}*</div>
                     </#if>
                     <input type="text" id="message-input" name="text" placeholder="What you wanna say?"/>
+                    <label style="margin-top: 10px">Choose file to send:
+                        <input type="file" name="messageFile" accept="*/*" multiple>
+                    </label>
                     <input style="color: whitesmoke; background-color: #4dae3c; margin-top: 10px; margin-bottom: 10px;"
                            class="btn btn--pill btn--green" id="send-button" type="submit" value="Say"/>
                     <input type="hidden" name="_csrf" value="${_csrf.token}"/>
@@ -46,7 +49,16 @@
                                             </a>
                                         </strong>
                                         <small>(${message.getFormattedDateTime()})</small></div>
-                                    <div><p style="word-wrap: break-word;">${message.text}</p></div>
+                                    <div>
+                                        <#if message.files??>
+                                            <#list message.files as file>
+                                            <p style="word-wrap: break-word; margin-bottom: 0px"><a
+                                                        href="/download/${file}">${file.substring(37)}</a>
+                                            </p>
+                                            </#list>
+                                        </#if>
+                                        <p style="word-wrap: break-word;">${message.text}</p>
+                                    </div>
                                 </th>
                             </tr>
                         </table>
